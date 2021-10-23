@@ -7,16 +7,20 @@ class CellState(Enum):
     WALL = auto()
 
 
-class SolveStep(Enum):
-    UP = auto()
-    DOWN = auto()
-    LEFT = auto()
-    RIGHT = auto()
+class SolveStep(tuple[int, int], Enum):
+    UP = (-1, 0)
+    DOWN = (1, 0)
+    LEFT = (0, -1)
+    RIGHT = (0, 1)
 
 
 class Position(NamedTuple):
     row: int
     col: int
+
+    def apply_step(self, step: SolveStep) -> "Position":
+        delta_row, delta_col = step
+        return Position(self.row + delta_row, self.col + delta_col)
 
 
 class Maze:

@@ -10,5 +10,5 @@ class MazeRenderer(ABC):
         self.steps = steps
 
     @abstractmethod
-    def render(self):
+    def render(self) -> None:
         """Render the application of the steps on the maze"""
