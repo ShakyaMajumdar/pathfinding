@@ -1,12 +1,14 @@
-from typing import Type
+from collections.abc import Iterable
+from typing import Callable
 
 from pathfinding import loaders, renderers, solvers
+from pathfinding.maze import Maze, SolveStep
 
 
 def main(
-    loader: Type[loaders.MazeLoader],
-    solver: Type[solvers.MazeSolver],
-    renderer: Type[renderers.MazeRenderer],
+    loader: Callable[[], loaders.MazeLoader],
+    solver: Callable[[Maze], solvers.MazeSolver],
+    renderer: Callable[[Maze, Iterable[SolveStep]], renderers.MazeRenderer],
 ):
     maze = loader().load()
     steps = solver(maze).solve()

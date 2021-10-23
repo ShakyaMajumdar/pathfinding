@@ -65,7 +65,7 @@ def parse_maze(maze_str: list[str]) -> Maze:
                     raise ValueError(f"exit point at row: {row}, col: {col} is not on boundary of maze")
                 if exit_position is not None:
                     raise ValueError(
-                        f"entry point already set at row: {entry_position.row}, col: {entry_position.col}, "
+                        f"entry point already set at row: {exit_position.row}, col: {exit_position.col}, "
                         f"attempted to set again at row: {row}, col: {col}"
                     )
                 parsed_line.append(CellState.EMPTY)
