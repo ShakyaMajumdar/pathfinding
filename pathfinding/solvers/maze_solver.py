@@ -1,20 +1,13 @@
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
-from enum import Enum, auto
+from collections.abc import Iterable
 
-from ..maze import Maze, Position
-
-
-class SolveStep(Enum):
-    UP = auto()
-    DOWN = auto()
-    LEFT = auto()
-    RIGHT = auto()
+from ..maze import Maze, SolveStep
 
 
 class MazeSolver(ABC):
+    def __init__(self, maze: Maze):
+        self.maze = maze
+
     @abstractmethod
-    def solve(
-        self, maze: Maze, entry_point: Position, exit_point: Position
-    ) -> Sequence[SolveStep]:
+    def solve(self) -> Iterable[SolveStep]:
         """Return a sequence of steps that will solve the given maze."""
