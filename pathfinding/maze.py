@@ -13,6 +13,14 @@ class SolveStep(tuple[int, int], Enum):
     LEFT = (0, -1)
     RIGHT = (0, 1)
 
+    def __invert__(self) -> "SolveStep":
+        return {
+            SolveStep.UP: SolveStep.DOWN,
+            SolveStep.DOWN: SolveStep.UP,
+            SolveStep.LEFT: SolveStep.RIGHT,
+            SolveStep.RIGHT: SolveStep.LEFT,
+        }[self]
+
 
 class Position(NamedTuple):
     row: int
@@ -46,15 +54,19 @@ class Grid(Generic[T]):
         row, col = position
         return row in (0, n_rows - 1) or col in (0, n_cols - 1)
 
-    def get_neighbours(self, position: tuple[int, int]) -> list[T]:
-        neighbours: list[T] = []
+    def get_neighbours(self, position: tuple[int, int]) -> list[tuple[SolveStep, T]]:
+        neighbours: list[tuple[SolveStep, T]] = []
         position = Position(*position)
         for step in SolveStep:
             try:
-                neighbours.append(self[position.apply_step(step)])
+                neighbour_position = position.apply_step(step)
+                neighbours.append((step, self[neighbour_position]))
             except IndexError:
                 pass
         return neighbours
+
+    def __repr__(self) -> str:
+        return repr(self._elements)
 
     @classmethod
     def from_dimensions(cls, dims: tuple[int, int], default: T) -> "Grid[T]":

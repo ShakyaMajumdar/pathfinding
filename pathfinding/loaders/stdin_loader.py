@@ -43,7 +43,7 @@ def parse_maze(maze_str: list[str]) -> Maze:
                 pass
 
             elif char == "X":
-                if maze_grid.on_boundary((row, col)):
+                if not maze_grid.on_boundary((row, col)):
                     raise ValueError(f"entry point at row: {row}, col: {col} is not on boundary of maze")
                 if entry_position is not None:
                     raise ValueError(
@@ -53,7 +53,7 @@ def parse_maze(maze_str: list[str]) -> Maze:
                 entry_position = Position(row, col)
 
             elif char == "Y":
-                if maze_grid.on_boundary((row, col)):
+                if not maze_grid.on_boundary((row, col)):
                     raise ValueError(f"exit point at row: {row}, col: {col} is not on boundary of maze")
                 if exit_position is not None:
                     raise ValueError(

@@ -21,6 +21,6 @@ def main(
 if __name__ == "__main__":
     main(
         loaders.StandardInputLoader,
-        solvers.BruteforceSolver,
+        solvers.BFSSolver,
         renderers.StandardOutputRenderer,
     )
