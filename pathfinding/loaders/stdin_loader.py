@@ -5,7 +5,7 @@ from ..maze import CellState, Maze, Position
 from .maze_loader import MazeLoader
 
 
-def on_boundary(dims: tuple[int, int], position: tuple[int, int]):
+def on_boundary(dims: tuple[int, int], position: tuple[int, int]) -> bool:
     n_rows, n_cols = dims
     row, col = position
     return row in (0, n_rows - 1) or col in (0, n_cols - 1)

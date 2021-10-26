@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
 
-from ..maze import Maze, SolveStep
+from ..maze import Maze
+from ..solvers import MazeSolver
 
 
 class MazeRenderer(ABC):
-    def __init__(self, maze: Maze, steps: Iterable[SolveStep]):
+    def __init__(self, maze: Maze, solver: MazeSolver):
         self.maze = maze
-        self.steps = steps
+        self.solver = solver
 
     @abstractmethod
     def render(self) -> None:

@@ -1,15 +1,12 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 
-from ..maze import SolveStep
+from ..maze import Position, SolveStep
 from .maze_solver import MazeSolver
 
 
 class BruteforceSolver(MazeSolver):
-    def solve(self) -> Iterable[SolveStep]:
-        yield from (
-            SolveStep.DOWN,
-            SolveStep.DOWN,
-            SolveStep.LEFT,
-            SolveStep.LEFT,
-            SolveStep.DOWN,
-        )
+    def solve(self) -> Iterable[Position]:
+        pass
+
+    def get_shortest_path(self) -> Sequence[SolveStep]:
+        pass
