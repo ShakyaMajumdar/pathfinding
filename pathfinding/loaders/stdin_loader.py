@@ -1,7 +1,7 @@
 from textwrap import dedent
 from typing import Optional
 
-from ..maze import CellState, Maze, Position
+from ..maze import CellState, Grid, Maze, Position
 from .maze_loader import MazeLoader
 
 
@@ -36,18 +36,17 @@ def parse_maze(maze_str: list[str]) -> Maze:
     if not all(len(line) == n_cols for line in maze_str):
         raise ValueError("all rows are not of the same size")
 
-    maze: list[list[CellState]] = []
+    maze_grid: Grid[CellState] = Grid.from_dimensions((n_rows, n_cols), default=CellState.EMPTY)
     entry_position: Optional[Position] = None
     exit_position: Optional[Position] = None
 
     for row, line in enumerate(maze_str):
-        parsed_line: list[CellState] = []
         for col, char in enumerate(line):
             if char == "#":
-                parsed_line.append(CellState.WALL)
+                maze_grid[row, col] = CellState.WALL
 
             elif char == ".":
-                parsed_line.append(CellState.EMPTY)
+                pass
 
             elif char == "X":
                 if not on_boundary((n_rows, n_cols), (row, col)):
@@ -57,7 +56,6 @@ def parse_maze(maze_str: list[str]) -> Maze:
                         f"entry point already set at row: {entry_position.row}, col: {entry_position.col}, "
                         f"attempted to set again at row: {row}, col: {col}"
                     )
-                parsed_line.append(CellState.EMPTY)
                 entry_position = Position(row, col)
 
             elif char == "Y":
@@ -68,13 +66,10 @@ def parse_maze(maze_str: list[str]) -> Maze:
                         f"entry point already set at row: {exit_position.row}, col: {exit_position.col}, "
                         f"attempted to set again at row: {row}, col: {col}"
                     )
-                parsed_line.append(CellState.EMPTY)
                 exit_position = Position(row, col)
 
             else:
                 raise ValueError(f"unrecognized character {char} at row: {row}, col: {col}")
-
-        maze.append(parsed_line)
 
     if entry_position is None:
         raise ValueError("entry position not set")
@@ -82,7 +77,7 @@ def parse_maze(maze_str: list[str]) -> Maze:
     if exit_position is None:
         raise ValueError("exit position not set")
 
-    return Maze(maze, entry_position, exit_position)
+    return Maze(maze_grid, entry_position, exit_position)
 
 
 class StandardInputLoader(MazeLoader):
