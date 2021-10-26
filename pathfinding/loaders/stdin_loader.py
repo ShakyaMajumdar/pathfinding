@@ -5,12 +5,6 @@ from ..maze import CellState, Grid, Maze, Position
 from .maze_loader import MazeLoader
 
 
-def on_boundary(dims: tuple[int, int], position: tuple[int, int]) -> bool:
-    n_rows, n_cols = dims
-    row, col = position
-    return row in (0, n_rows - 1) or col in (0, n_cols - 1)
-
-
 def parse_maze(maze_str: list[str]) -> Maze:
     """
     Parse a maze from a string representation.
@@ -49,7 +43,7 @@ def parse_maze(maze_str: list[str]) -> Maze:
                 pass
 
             elif char == "X":
-                if not on_boundary((n_rows, n_cols), (row, col)):
+                if maze_grid.on_boundary((row, col)):
                     raise ValueError(f"entry point at row: {row}, col: {col} is not on boundary of maze")
                 if entry_position is not None:
                     raise ValueError(
@@ -59,7 +53,7 @@ def parse_maze(maze_str: list[str]) -> Maze:
                 entry_position = Position(row, col)
 
             elif char == "Y":
-                if not on_boundary((n_rows, n_cols), (row, col)):
+                if maze_grid.on_boundary((row, col)):
                     raise ValueError(f"exit point at row: {row}, col: {col} is not on boundary of maze")
                 if exit_position is not None:
                     raise ValueError(

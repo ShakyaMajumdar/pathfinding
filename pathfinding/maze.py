@@ -32,19 +32,29 @@ class Grid(Generic[T]):
     def __init__(self, elements: list[list[T]]):
         self._elements = elements
 
-    def __getitem__(self, item: Position | tuple[int, int]) -> T:
-        if isinstance(item, Position):
-            row, col = item.row, item.col
-        else:
-            row, col = item
+    def __getitem__(self, item: tuple[int, int]) -> T:
+        row, col = item
         return self._elements[row][col]
 
-    def __setitem__(self, key: Position | tuple[int, int], value: T) -> None:
-        if isinstance(key, Position):
-            row, col = key.row, key.col
-        else:
-            row, col = key
+    def __setitem__(self, key: tuple[int, int], value: T) -> None:
+        row, col = key
         self._elements[row][col] = value
+
+    def on_boundary(self, position: tuple[int, int]) -> bool:
+        """Return whether the given position lies on the boundary of the grid."""
+        n_rows, n_cols = self.dimensions
+        row, col = position
+        return row in (0, n_rows - 1) or col in (0, n_cols - 1)
+
+    def get_neighbours(self, position: tuple[int, int]) -> list[T]:
+        neighbours: list[T] = []
+        position = Position(*position)
+        for step in SolveStep:
+            try:
+                neighbours.append(self[position.apply_step(step)])
+            except IndexError:
+                pass
+        return neighbours
 
     @classmethod
     def from_dimensions(cls, dims: tuple[int, int], default: T) -> "Grid[T]":
