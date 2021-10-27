@@ -2,7 +2,7 @@ from textwrap import dedent
 from typing import Optional
 
 from ..maze import CellState, Grid, Maze, Position
-from .maze_loader import MazeLoader
+from .maze_loader_abc import MazeLoader
 
 
 def parse_maze(maze_str: list[str]) -> Maze:

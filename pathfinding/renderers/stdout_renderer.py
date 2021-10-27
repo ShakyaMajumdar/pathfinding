@@ -1,4 +1,4 @@
-from .maze_renderer import MazeRenderer
+from .maze_renderer_abc import MazeRenderer
 
 
 class StandardOutputRenderer(MazeRenderer):
