@@ -35,13 +35,18 @@ T = TypeVar("T")
 
 
 class Grid(Generic[T]):
-    """Represents a 2D structure which can be indexed by instances of Position and two-tuples."""
+    """
+    Represents a 2D structure which can be indexed by instances of Position and two-tuples.
+    Does not allow negative indexing.
+    """
 
     def __init__(self, elements: list[list[T]]):
         self._elements = elements
 
     def __getitem__(self, item: tuple[int, int]) -> T:
         row, col = item
+        if row < 0 or col < 0:
+            raise IndexError("list index out of range")
         return self._elements[row][col]
 
     def __setitem__(self, key: tuple[int, int], value: T) -> None:
