@@ -17,7 +17,7 @@ class BFSSolver(MazeSolver):
             position = exploration_queue.popleft()
             visited.add(position)
 
-            for direction, neighbour in self.maze.grid.get_neighbours(position):
+            for direction, neighbour in self.maze.grid.get_neighbours_where_predicate(position):
                 neighbour_position = position.apply_step(direction)
                 if neighbour == CellState.WALL or neighbour_position in visited:
                     continue
@@ -35,7 +35,9 @@ class BFSSolver(MazeSolver):
 
         current = self.maze.exit_point
         while current != self.maze.entry_point:
-            next_step, _ = min(self.shortest_distances.get_neighbours(current), key=operator.itemgetter(1))
+            next_step, _ = min(
+                self.shortest_distances.get_neighbours_where_predicate(current), key=operator.itemgetter(1)
+            )
             steps.appendleft(~next_step)
             current = current.apply_step(next_step)
 

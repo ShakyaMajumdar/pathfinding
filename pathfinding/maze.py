@@ -1,5 +1,9 @@
+from collections import deque
+from collections.abc import Iterator
 from enum import Enum, auto
-from typing import Generic, NamedTuple, TypeVar
+from typing import Callable, Generic, NamedTuple, TypeVar
+
+from .graph import Edge, Graph, Vertex
 
 
 class CellState(Enum):
@@ -30,6 +34,9 @@ class Position(NamedTuple):
         delta_row, delta_col = step
         return Position(self.row + delta_row, self.col + delta_col)
 
+    def __repr__(self) -> str:
+        return f"({self.row}, {self.col})"
+
 
 T = TypeVar("T")
 
@@ -53,19 +60,27 @@ class Grid(Generic[T]):
         row, col = key
         self._elements[row][col] = value
 
+    def __iter__(self) -> Iterator[tuple[Position, T]]:
+        for row, row_elements in enumerate(self._elements):
+            for col, element in enumerate(row_elements):
+                yield Position(row, col), element
+
     def on_boundary(self, position: tuple[int, int]) -> bool:
         """Return whether the given position lies on the boundary of the grid."""
         n_rows, n_cols = self.dimensions
         row, col = position
         return row in (0, n_rows - 1) or col in (0, n_cols - 1)
 
-    def get_neighbours(self, position: tuple[int, int]) -> list[tuple[SolveStep, T]]:
+    def get_neighbours_where_predicate(
+        self, position: tuple[int, int], predicate: Callable[[tuple[Position, T]], bool] = lambda _: True
+    ) -> list[tuple[SolveStep, T]]:
         neighbours: list[tuple[SolveStep, T]] = []
         position = Position(*position)
         for step in SolveStep:
             try:
                 neighbour_position = position.apply_step(step)
-                neighbours.append((step, self[neighbour_position]))
+                if predicate((neighbour_position, self[neighbour_position])):
+                    neighbours.append((step, self[neighbour_position]))
             except IndexError:
                 pass
         return neighbours
@@ -78,6 +93,14 @@ class Grid(Generic[T]):
         """Initialise a grid with the given dimensions and default value."""
         rows, cols = dims
         return cls([[default for _ in range(cols)] for _ in range(rows)])
+
+    @classmethod
+    def from_dimensions_with_factory(
+        cls, dims: tuple[int, int], default_factory: Callable[[tuple[int, int]], T]
+    ) -> "Grid[T]":
+        """Initialise a grid with the given dimensions and default value."""
+        rows, cols = dims
+        return cls([[default_factory((row, col)) for col in range(cols)] for row in range(rows)])
 
     @property
     def dimensions(self) -> tuple[int, int]:
@@ -92,3 +115,73 @@ class Maze:
 
         if not self.grid[entry_point] == self.grid[exit_point] == CellState.EMPTY:
             raise ValueError("entry point and exit point are not empty")
+
+    def to_graph(self) -> Graph[Position, list[SolveStep]]:
+        """Convert the maze to a graph."""
+        graph = Graph[Position, list[SolveStep]]()
+        visited_positions = set[Position]()
+        visited_position_pairs = set[tuple[Position, Position]]()
+
+        vertex_grid: Grid[Vertex[Position, list[SolveStep]]] = Grid.from_dimensions_with_factory(
+            self.grid.dimensions, lambda pos: Vertex(Position(*pos))
+        )
+
+        for root_position, root_vertex in vertex_grid:
+            if root_position in visited_positions or self.grid[root_position] != CellState.EMPTY:
+                continue
+
+            exploration_queue: deque[
+                tuple[Vertex[Position, list[SolveStep]], Edge[Position, list[SolveStep]]]
+            ] = deque()
+
+            visited_positions.add(root_position)
+            for other_neighbour_direction, other_neighbour_vertex in vertex_grid.get_neighbours_where_predicate(
+                root_position, lambda tup: self.grid[tup[0]] == CellState.EMPTY
+            ):
+                new_edge = Edge([other_neighbour_direction], tail=root_vertex, head=other_neighbour_vertex)
+                root_vertex.edges.add(new_edge)
+                other_neighbour_vertex.edges.add(new_edge)
+                graph.add_edge(new_edge)
+                visited_position_pairs.add((root_position, other_neighbour_vertex.data))
+                exploration_queue.append((other_neighbour_vertex, new_edge))
+
+            while exploration_queue:
+                vertex, edge = exploration_queue.popleft()
+                parent_neighbour_position = vertex.data.apply_step(~edge.data[-1])
+
+                if (vertex.data, parent_neighbour_position) in visited_position_pairs:
+                    graph.remove_edge(edge)
+                    continue
+                visited_position_pairs.add((parent_neighbour_position, vertex.data))
+
+                if vertex.data in visited_positions:
+                    continue
+                visited_positions.add(vertex.data)
+
+                other_neighbours: list[
+                    tuple[SolveStep, Vertex[Position, list[SolveStep]]]
+                ] = vertex_grid.get_neighbours_where_predicate(
+                    vertex.data,
+                    lambda tup: self.grid[tup[0]] == CellState.EMPTY and tup[1].data != parent_neighbour_position,
+                )
+
+                if len(other_neighbours) == 0:
+                    continue
+
+                if len(other_neighbours) == 1:
+                    other_neighbour_direction, other_neighbour_vertex = other_neighbours[0]
+                    graph.remove_vertex(vertex)
+                    vertex.edges.remove(edge)
+                    other_neighbour_vertex.edges.add(edge)
+                    edge.head = other_neighbour_vertex
+                    edge.data.append(other_neighbour_direction)
+                    exploration_queue.append((other_neighbour_vertex, edge))
+                    continue
+
+                for other_neighbour_direction, other_neighbour_vertex in other_neighbours:
+                    new_edge = Edge([other_neighbour_direction], tail=vertex, head=other_neighbour_vertex)
+                    other_neighbour_vertex.edges.add(new_edge)
+                    graph.add_edge(new_edge)
+                    exploration_queue.append((other_neighbour_vertex, new_edge))
+
+        return graph
