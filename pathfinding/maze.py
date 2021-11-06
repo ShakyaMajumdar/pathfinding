@@ -107,6 +107,11 @@ class Grid(Generic[T]):
         return len(self._elements), len(self._elements[0])
 
 
+MazeVertex = Vertex[Position, list[SolveStep]]
+MazeEdge = Edge[Position, list[SolveStep]]
+MazeGraph = Graph[Position, list[SolveStep]]
+
+
 class Maze:
     def __init__(self, grid: Grid[CellState], entry_point: Position, exit_point: Position):
         self.grid = grid
@@ -116,29 +121,27 @@ class Maze:
         if not self.grid[entry_point] == self.grid[exit_point] == CellState.EMPTY:
             raise ValueError("entry point and exit point are not empty")
 
-    def to_graph(self) -> Graph[Position, list[SolveStep]]:
+    def to_graph(self) -> MazeGraph:
         """Convert the maze to a graph."""
-        graph = Graph[Position, list[SolveStep]]()
+        graph = MazeGraph()
         visited_positions = set[Position]()
         visited_position_pairs = set[tuple[Position, Position]]()
 
-        vertex_grid: Grid[Vertex[Position, list[SolveStep]]] = Grid.from_dimensions_with_factory(
-            self.grid.dimensions, lambda pos: Vertex(Position(*pos))
+        vertex_grid: Grid[MazeVertex] = Grid.from_dimensions_with_factory(
+            self.grid.dimensions, lambda pos: MazeVertex(Position(*pos))
         )
 
         for root_position, root_vertex in vertex_grid:
             if root_position in visited_positions or self.grid[root_position] != CellState.EMPTY:
                 continue
 
-            exploration_queue: deque[
-                tuple[Vertex[Position, list[SolveStep]], Edge[Position, list[SolveStep]]]
-            ] = deque()
+            exploration_queue: deque[tuple[MazeVertex, MazeEdge]] = deque()
 
             visited_positions.add(root_position)
             for other_neighbour_direction, other_neighbour_vertex in vertex_grid.get_neighbours_where_predicate(
                 root_position, lambda tup: self.grid[tup[0]] == CellState.EMPTY
             ):
-                new_edge = Edge([other_neighbour_direction], tail=root_vertex, head=other_neighbour_vertex)
+                new_edge = MazeEdge([other_neighbour_direction], tail=root_vertex, head=other_neighbour_vertex)
                 root_vertex.edges.add(new_edge)
                 other_neighbour_vertex.edges.add(new_edge)
                 graph.add_edge(new_edge)
@@ -158,9 +161,7 @@ class Maze:
                     continue
                 visited_positions.add(vertex.data)
 
-                other_neighbours: list[
-                    tuple[SolveStep, Vertex[Position, list[SolveStep]]]
-                ] = vertex_grid.get_neighbours_where_predicate(
+                other_neighbours: list[tuple[SolveStep, MazeVertex]] = vertex_grid.get_neighbours_where_predicate(
                     vertex.data,
                     lambda tup: self.grid[tup[0]] == CellState.EMPTY and tup[1].data != parent_neighbour_position,
                 )
@@ -179,7 +180,7 @@ class Maze:
                     continue
 
                 for other_neighbour_direction, other_neighbour_vertex in other_neighbours:
-                    new_edge = Edge([other_neighbour_direction], tail=vertex, head=other_neighbour_vertex)
+                    new_edge = MazeEdge([other_neighbour_direction], tail=vertex, head=other_neighbour_vertex)
                     other_neighbour_vertex.edges.add(new_edge)
                     graph.add_edge(new_edge)
                     exploration_queue.append((other_neighbour_vertex, new_edge))
