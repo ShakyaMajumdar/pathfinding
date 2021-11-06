@@ -1,6 +1,6 @@
 from collections.abc import Iterable, Sequence
 
-from ..maze import Position, SolveStep
+from ..data_structures import Position, SolveStep
 from .maze_solver_abc import MazeSolver
 
 

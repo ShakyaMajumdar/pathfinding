@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 
-from ..maze import Grid, Maze, Position, SolveStep
+from ..data_structures import Grid, Position, SolveStep
+from ..maze import Maze
 
 
 class MazeSolver(ABC):

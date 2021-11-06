@@ -1,7 +1,8 @@
 from textwrap import dedent
 from typing import Optional
 
-from ..maze import CellState, Grid, Maze, Position
+from ..data_structures import Grid, Position
+from ..maze import CellState, Maze
 from .maze_loader_abc import MazeLoader
 
 

@@ -2,7 +2,8 @@ import operator
 from collections import deque
 from collections.abc import Iterable, Sequence
 
-from ..maze import CellState, Position, SolveStep
+from ..data_structures import Position, SolveStep
+from ..maze import CellState
 from .maze_solver_abc import MazeSolver
 
 
