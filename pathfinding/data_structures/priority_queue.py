@@ -54,10 +54,12 @@ class Heap(PriorityQueue[T]):
 
     def pop(self) -> T:
         popped = self.peek()
-        self._heap[0] = self._heap.pop()
         self._element_index_map.pop(popped)
-        self._element_index_map[self._heap[0].element] = 0
-        self.sift_down()
+        last_element = self._heap.pop()
+        if self._heap:
+            self._heap[0] = last_element
+            self._element_index_map[self._heap[0].element] = 0
+            self.sift_down()
         return popped
 
     def peek(self) -> T:
@@ -82,10 +84,14 @@ class Heap(PriorityQueue[T]):
 
     def sift_down(self) -> None:
         index = 0
+        if 2 * index + 2 >= len(self._heap):
+            return
         min_child_index = min((2 * index + 1, 2 * index + 2), key=lambda i: self._heap[i])
         while index < len(self._heap) and self._heap[index] > self._heap[min_child_index]:
             self._swap_indices(index, min_child_index)
             index = min_child_index
+            if 2 * index + 2 >= len(self._heap):
+                return
             min_child_index = min((2 * index + 1, 2 * index + 2), key=lambda i: self._heap[i])
 
     def _swap_indices(self, i1: int, i2: int) -> None:
