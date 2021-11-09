@@ -57,6 +57,13 @@ class Maze:
 
                 if (vertex.data, parent_neighbour_position) in visited_position_pairs:
                     graph.remove_edge(edge)
+                    edge.tail.edges.remove(edge)
+                    edge.head.edges.remove(edge)
+                    if not edge.tail.edges:
+                        graph.remove_vertex(edge.tail)
+                    if not edge.head.edges:
+                        graph.remove_vertex(edge.head)
+                    print("edge rem", edge.tail.data, edge.head.data)
                     continue
                 visited_position_pairs.add((parent_neighbour_position, vertex.data))
 
@@ -85,6 +92,7 @@ class Maze:
                 for other_neighbour_direction, other_neighbour_vertex in other_neighbours:
                     new_edge = MazeEdge([other_neighbour_direction], tail=vertex, head=other_neighbour_vertex)
                     other_neighbour_vertex.edges.add(new_edge)
+                    vertex.edges.add(new_edge)
                     graph.add_edge(new_edge)
                     exploration_queue.append((other_neighbour_vertex, new_edge))
 
