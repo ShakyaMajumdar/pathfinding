@@ -63,7 +63,6 @@ class Maze:
                         graph.remove_vertex(edge.tail)
                     if not edge.head.edges:
                         graph.remove_vertex(edge.head)
-                    print("edge rem", edge.tail.data, edge.head.data)
                     continue
                 visited_position_pairs.add((parent_neighbour_position, vertex.data))
 

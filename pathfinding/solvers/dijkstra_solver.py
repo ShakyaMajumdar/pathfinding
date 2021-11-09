@@ -28,7 +28,6 @@ class DijkstraSolver(MazeSolver):
                 if other_end in visited:
                     continue
                 new_dist = min(self.shortest_distances[other_end], self.shortest_distances[vertex] + len(edge.data))
-                print("upd", other_end.data, vertex.data, new_dist, self.shortest_distances[vertex])
                 self.shortest_distances[other_end] = new_dist
                 priority_queue.decrease_priority(other_end, new_dist)
 
