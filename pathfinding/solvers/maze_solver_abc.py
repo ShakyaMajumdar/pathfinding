@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 
-from ..data_structures import Grid, Position, SolveStep
+from ..data_structures import Position, SolveStep
 from ..maze import Maze
 
 
 class MazeSolver(ABC):
     def __init__(self, maze: Maze):
         self.maze = maze
-        self.shortest_distances: Grid[float] = Grid.from_dimensions(maze.grid.dimensions, default=float("inf"))
         self._completed = False
 
     @abstractmethod

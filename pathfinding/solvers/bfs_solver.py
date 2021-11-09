@@ -2,13 +2,14 @@ import operator
 from collections import deque
 from collections.abc import Iterable, Sequence
 
-from ..data_structures import Position, SolveStep
+from ..data_structures import Grid, Position, SolveStep
 from ..maze import CellState
 from .maze_solver_abc import MazeSolver
 
 
 class BFSSolver(MazeSolver):
     def solve(self) -> Iterable[Position]:
+        self.shortest_distances: Grid[float] = Grid.from_dimensions(self.maze.grid.dimensions, default=float("inf"))
         self.shortest_distances[self.maze.entry_point] = 0
 
         exploration_queue: deque[Position] = deque([self.maze.entry_point])
